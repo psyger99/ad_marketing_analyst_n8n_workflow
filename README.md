@@ -143,8 +143,6 @@ Performance Values (from the Data Cleaning and Transformation node's summary arr
 | **Data Check** | Empty or missing data | Slack alert (`Send Data Error`) + Stop workflow |
 | **Markdown Conversion** | Missing or malformed output | Code node validation check |
 
-`WIP: Slack Message Error` — for channel misconfiguration and logs issue.
-
 Each critical node either reports the issue through Slack or halts execution safely to prevent silent failures.
 
 ---
@@ -175,3 +173,23 @@ Clone the workflow and rename it per client (e.g., `Ad Marketing Analyst Workflo
 - Modify the `Schedule Trigger` node to generate reports daily, bi-weekly, or monthly.
 
 With minimal configuration changes, the workflow can serve multiple clients independently.
+
+## 🧪 Synthetic Data Generator
+To help you test or demonstrate the workflow without using real ad campaign data, the repository includes a utility script named `syn_data_generator.py`. 
+
+This script generates mock ad campaign performance data and can either save it locally as a CSV file or upload it directly to Google Sheets which is perfect for initial setup, demos, or debugging the workflow.
+
+**🧭 Usage**
+1. Replace the placeholders:
+- SERVICE_ACCOUNT_FILE = "<your_service_account.json>"
+- SPREADSHEET_ID = "<spreadsheet_id>"
+- SHEET_NAME = "<sheet_name>" 
+2. Run the program using CLI and appropriate flag:
+- Either:
+"""py
+python syn_data_generator.py --csv
+"""
+- Or:
+"""py
+python syn_data_generator.py --sheet
+"""
