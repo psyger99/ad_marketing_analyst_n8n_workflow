@@ -181,9 +181,9 @@ This script generates mock ad campaign performance data and can either save it l
 
 **🧭 Usage**
 1. Replace the placeholders:
-- SERVICE_ACCOUNT_FILE = "<your_service_account.json>"
-- SPREADSHEET_ID = "<spreadsheet_id>"
-- SHEET_NAME = "<sheet_name>" 
+  - SERVICE_ACCOUNT_FILE = "<your_service_account.json>"
+  - SPREADSHEET_ID = "<spreadsheet_id>"
+  - SHEET_NAME = "<sheet_name>" 
 2. Run the program using CLI and appropriate flag:
-- Either: `python syn_data_generator.py --csv` or: `python syn_data_generator.py --sheet`
+  - Either: `python syn_data_generator.py --csv` or: `python syn_data_generator.py --sheet`
 
