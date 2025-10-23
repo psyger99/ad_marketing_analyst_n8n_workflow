@@ -1,0 +1,1351 @@
+{
+  "name": "Ad Marketing Analysis Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1632,
+        80
+      ],
+      "id": "10f3854c-6140-4eea-9df1-509a11eba9fb",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Mock Data",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        48
+      ],
+      "id": "5594de72-010d-481a-9127-f079fa030509",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HOvA1JhZFx39HVk8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an Ad Marketing Analyst assistant. Capable of generating a Weekly Campaign Performance Report formatted for Google Docs.\n\n - Use the campaign and summary data below: \n{{ JSON.stringify($json.campaigns, null, 2) }} \n{{ JSON.stringify($json.summary, null, 2) }}\n\n - Each campaign from the data above includes Campaign Name, No. of Clicks, No. of Impressions, No. of Converted Users, Cost ($), CTR (%), CPA ($), and Performance Status.\n\n- Your first task is to put a title called \"Weekly Campaign Performance Report\".\n\n- Your second task is to create a table with headers exactly in this order and name for each column: Campaign Name, Clicks, Impressions, Conversions, Cost ($), CTR (%), CPA ($), and Performance Status where each row's values are what you see in the given data. Do not fabricate or assume values. Use actual values from the input data. You will not include the summary data in this table.\n\n- Your third task is to create a summary with a title \"AI-Generated Summary\". You will write a short, clear paragraph summarizing overall performance trends, top campaigns, and areas needing improvement using total and average data.\n\n- Your fourth task is to create a recommendations with a title \"Key Recommendations\". You will list 3 concise, actionable recommendations (bullet points), such as which campaigns to scale or pause, optimization ideas for CTR, CPA, or conversions. You will make each of your recommendation as short as possible (possibly consisting 10-15 words each).\n\n- You will be using only \"###\" for each task as the font size of each title. You will also be using an appropriate emoji for each bulleted key-recommendations. Leave each task title with no emojis.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -208
+      ],
+      "id": "13d469f1-b782-49ce-ab84-bea36c111ebc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        -32
+      ],
+      "id": "17add4ab-98ba-4220-a5fc-ecdff9d6de43",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "BQqUVQmiauJfYKzo",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "options": {
+          "emoji": true,
+          "requireSpaceBeforeHeadingText": true,
+          "noHeaderId": true,
+          "tables": true
+        }
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -208
+      ],
+      "id": "6970a74f-ee9c-4d9f-b36d-a914a0d5eb0a",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "data",
+        "binaryPropertyName": "file",
+        "options": {
+          "fileName": "Weekly Report.html"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1088,
+        -208
+      ],
+      "id": "ff9cc7b8-fbba-4897-98d2-1152eeb28b45",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1456,
+        -48
+      ],
+      "id": "a5e21508-d374-4859-8280-94323e25771d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "file content",
+        "name": "={{ $node[\"Get Week of the Month\"].json[\"full_label\"] }} - Weekly Report",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1X5Gxm9F-qSw4m8w8Q63si5Hp0KqKQf0Z",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1X5Gxm9F-qSw4m8w8Q63si5Hp0KqKQf0Z"
+        },
+        "options": {
+          "convertToGoogleDocument": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        944,
+        32
+      ],
+      "id": "431a0701-6643-4519-8dfc-babb697b2b29",
+      "name": "Create file from text",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AQSvDFycwNVB3Oog",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $node[\"Create file from text\"].json[\"id\"] }}",
+          "mode": "id"
+        },
+        "changeFileContent": true,
+        "inputDataFieldName": "file",
+        "options": {
+          "fields": [
+            "id"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1696,
+        -48
+      ],
+      "id": "b525ad1a-afcc-466b-98d2-75c6457a56ca",
+      "name": "Update file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AQSvDFycwNVB3Oog",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items (each represents a row from Google Sheet)\nconst items = $input.all();\n\n// ✅ Stop workflow if spreadsheet is empty\nif (!items || items.length === 0) {\n  throw new Error(\"❌ The Google Sheet is empty — workflow stopped.\");\n}\n\n// Define a helper function to format header names\nfunction formatHeader(header) {\n  const key = header.trim().toLowerCase();\n\n  if (key.includes(\"ctr\")) return \"CTR (%)\";\n  if (key.includes(\"cpa\")) return \"CPA ($)\";\n  \n  // Capitalize first letter of each word\n  return key\n    .split(/[_\\s]+/)\n    .map(word => word.charAt(0).toUpperCase() + word.slice(1))\n    .join(\" \");\n}\n\n// Extract headers from the first item\nconst rawHeaders = Object.keys(items[0].json);\nconst formattedHeaders = rawHeaders.map(formatHeader);\n\n// Transform data rows and add Performance Status\nconst transformedRows = items.map(item => {\n  const row = {};\n  rawHeaders.forEach((key, index) => {\n    let value = item.json[key];\n    const header = formattedHeaders[index];\n\n    // ✅ Format numeric fields with commas (Clicks, Impressions, Conversions)\n    if (\n      [\"Clicks\", \"Impressions\", \"Conversions\"].includes(header) &&\n      typeof value === \"number\"\n    ) {\n      value = value.toLocaleString(\"en-US\");\n    }\n\n    // ✅ Format \"Cost\" column with a $ symbol (no decimals)\n    if (header === \"Cost\" && typeof value === \"number\") {\n      value = `$${value.toLocaleString(\"en-US\", {\n        minimumFractionDigits: 0,\n        maximumFractionDigits: 0,\n      })}`;\n    }\n\n    // ✅ Format \"CTR (%)\" with % sign\n    if (header === \"CTR (%)\" && typeof value === \"number\") {\n      value = `${value.toFixed(2)}%`;\n    }\n\n    // ✅ Format \"CPA ($)\" with $ sign\n    if (header === \"CPA ($)\" && typeof value === \"number\") {\n      value = `$${value.toFixed(2)}`;\n    }\n\n    row[header] = value;\n  });\n\n  // Convert numeric values for calculations (from original JSON, not formatted)\n  const ctr = parseFloat(item.json[\"ctr_%\"]);\n  const cpa = parseFloat(item.json[\"cpa_$\"]);\n\n  // Determine performance status\n  let status = \"\";\n  if (ctr >= 3.5 && cpa <= 40) {\n    status = \"✅ Excellent CTR\";\n  } else if (ctr >= 2.3 && cpa <= 40) {\n    status = \"✅ Top Performer\";\n  } else if (ctr >= 2.0 && cpa <= 50) {\n    status = \"✅ Good\";\n  } else if (cpa > 70 && ctr <= 2.29) {\n    status = \"🚨 Underperforming\";\n  } else if (cpa > 60) {\n    status = \"⚠️ High CPA\";\n  } else {\n    status = \"✅ Average\";\n  }\n\n  row[\"Performance Status\"] = status;\n\n  return row;\n});\n\n// Calculate summary totals (use original numeric values)\nconst totalClicks = items.reduce((sum, item) => sum + (parseFloat(item.json[\"clicks\"]) || 0), 0);\nconst totalImpressions = items.reduce((sum, item) => sum + (parseFloat(item.json[\"impressions\"]) || 0), 0);\nconst totalConversions = items.reduce((sum, item) => sum + (parseFloat(item.json[\"conversions\"]) || 0), 0);\nconst totalCost = items.reduce((sum, item) => sum + (parseFloat(item.json[\"cost\"]) || 0), 0);\nconst avgCTR = totalImpressions > 0 ? parseFloat(((totalClicks / totalImpressions) * 100).toFixed(2)) : 0;\nconst avgCPA = totalConversions > 0 ? parseFloat((totalCost / totalConversions).toFixed(2)) : 0;\n\n// Return as a single structured JSON with campaigns and summary (formatted)\nreturn [\n  {\n    json: {\n      campaigns: transformedRows,\n      summary: {\n        \"Total Campaigns\": transformedRows.length,\n        \"Total Clicks\": totalClicks.toLocaleString(\"en-US\"),\n        \"Total Impressions\": totalImpressions.toLocaleString(\"en-US\"),\n        \"Total Conversions\": totalConversions.toLocaleString(\"en-US\"),\n        \"Total Cost ($)\": `$${totalCost.toLocaleString(\"en-US\", {\n          minimumFractionDigits: 0,\n          maximumFractionDigits: 0,\n        })}`,\n        \"Average CTR (%)\": `${avgCTR}%`,\n        \"Average CPA ($)\": `$${avgCPA.toLocaleString(\"en-US\", {\n          minimumFractionDigits: 0,\n          maximumFractionDigits: 0,\n        })}`,\n      },\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -96
+      ],
+      "id": "22d84575-a912-4a4a-bcec-0b4b21e980a6",
+      "name": "Data Cleaning and Transformation"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the current date\nconst today = new Date();\n// Calculate the start of the current week (Monday)\nconst dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ...\nconst diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; \nconst weekStart = new Date(today);\nweekStart.setDate(today.getDate() + diff);\n// Get month and year\nconst monthNames = [\n\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n\"July\", \"August\", \"September\", \"October\", \"November\", \"December\"\n];\nconst month = monthNames[weekStart.getMonth()];\nconst year = weekStart.getFullYear();\n// Determine week of the month\nconst firstDayOfMonth = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);\nconst firstWeekday = firstDayOfMonth.getDay() === 0 ? 7 : firstDayOfMonth.getDay(); // adjust Sunday to 7\nconst adjustedDate = weekStart.getDate() + firstWeekday - 1;\nconst weekOfMonth = Math.ceil(adjustedDate / 7);\n// Convert week number to ordinal (1st, 2nd, 3rd, 4th, etc.)\nfunction toOrdinal(n) {\nif (n % 10 === 1 && n % 100 !== 11) return `${n}st`;\nif (n % 10 === 2 && n % 100 !== 12) return `${n}nd`;\nif (n % 10 === 3 && n % 100 !== 13) return `${n}rd`;\nreturn `${n}th`;\n}\n// Create the final label\nconst fullLabel = `${toOrdinal(weekOfMonth)} Week of ${month} ${year}`;\n// Return formatted outputs\nreturn [\n{\n    json: {\n    full_label: fullLabel\n    }\n}\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        112
+      ],
+      "id": "610801ce-c726-49b2-aa45-9103453f4f8b",
+      "name": "Get Week of the Month"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item;\n\nif (item.binary && item.binary.file) {\n  item.binary.file.mimeType = 'text/html';\n}\n\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        -208
+      ],
+      "id": "774f9639-8a80-47cb-9905-f8ff472f67fc",
+      "name": "Set to text/html"
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "={{ $json.full_label }} - Weekly Report",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "Weekly Report"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        352
+      ],
+      "id": "8b90c656-d86e-4947-b53b-bbf488c2a5ec",
+      "name": "Create spreadsheet",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HOvA1JhZFx39HVk8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.spreadsheetId }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1X5Gxm9F-qSw4m8w8Q63si5Hp0KqKQf0Z",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1X5Gxm9F-qSw4m8w8Q63si5Hp0KqKQf0Z"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        720,
+        352
+      ],
+      "id": "70d9ee28-47dd-4992-89e8-92c450aaaec6",
+      "name": "Move file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AQSvDFycwNVB3Oog",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        944,
+        240
+      ],
+      "id": "2db458be-d215-43e6-a2dc-29d529fa3c7c",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "campaigns",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        240
+      ],
+      "id": "6d926cc6-45c3-449f-9298-16504f4e6dd9",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $node[\"Move file\"].json[\"id\"] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Weekly Report",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Campaign Name",
+              "displayName": "Campaign Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clicks",
+              "displayName": "Clicks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Impressions",
+              "displayName": "Impressions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Conversions",
+              "displayName": "Conversions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cost",
+              "displayName": "Cost",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CTR (%)",
+              "displayName": "CTR (%)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CPA ($)",
+              "displayName": "CPA ($)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Performance Status",
+              "displayName": "Performance Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "locationDefine": {
+            "values": {
+              "headerRow": 3,
+              "firstDataRow": 4
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1552,
+        240
+      ],
+      "id": "528a1d32-6bc5-49bf-b996-661c35168f40",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HOvA1JhZFx39HVk8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Merge1').item.json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Weekly Report",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1920,
+        240
+      ],
+      "id": "59c8abe2-3006-4d52-b023-c23b783a0891",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HOvA1JhZFx39HVk8",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "25a2ffa9-f9e9-423f-b007-2b37c183814f",
+              "name": "Campaign Name",
+              "value": "={{ $json[\"Campaign Name\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "127418b8-72b8-4fbc-9de0-ff18700ad14b",
+              "name": "Clicks",
+              "value": "={{ $json.Clicks }}",
+              "type": "string"
+            },
+            {
+              "id": "2d1237a8-bb4f-478e-93fc-243959d50dcf",
+              "name": "Impressions",
+              "value": "={{ $json.Impressions }}",
+              "type": "string"
+            },
+            {
+              "id": "36c0eba1-dce1-4e41-b04c-0e3137eb070b",
+              "name": "Conversions",
+              "value": "={{ $json.Conversions }}",
+              "type": "string"
+            },
+            {
+              "id": "012e7d45-6116-4b29-9cd6-1efc760c0816",
+              "name": "Cost",
+              "value": "={{ $json.Cost }}",
+              "type": "string"
+            },
+            {
+              "id": "3325c345-ac23-4d92-b4b0-6d122982081d",
+              "name": "CTR (%)",
+              "value": "={{ $json[\"CTR (%)\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "a6dd74dd-40f7-47a8-ace0-9124d83e2575",
+              "name": "CPA ($)",
+              "value": "={{ $json[\"CPA ($)\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "3a14ab33-6d7c-4d01-980e-9af997e6a6ad",
+              "name": "Performance Status",
+              "value": "={{ $json[\"Performance Status\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        240
+      ],
+      "id": "8dcf202a-f962-4028-85d3-a562154541aa",
+      "name": "Map table"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a5666272-72c8-4ee5-89c4-db28be279d57",
+              "name": "Weekly Campaign Performance Report",
+              "value": "    ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1712,
+        240
+      ],
+      "id": "cbe880c6-7f63-4781-9610-e25bd9018ae1",
+      "name": "Map title"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2144,
+        -32
+      ],
+      "id": "36c4b4d1-6b40-492c-940f-a65524cffd1a",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access the Markdown node (replace with your exact node name if different)\nconst markdownNode = $node[\"Markdown\"];\n\n// Safety check\nif (!markdownNode || !markdownNode.json || !markdownNode.json.output) {\n  throw new Error(\"Markdown node or its output could not be found.\");\n}\n\n// Get the markdown text\nconst markdown = markdownNode.json.output;\n\n// Extract the \"AI-Generated Summary\" section\n// This grabs everything between ### AI-Generated Summary and ### Key Recommendations (or the end)\nconst match = markdown.match(/### AI-Generated Summary([\\s\\S]*?)(?=### Key Recommendations|$)/);\n\nconst summarySection = match ? match[1].trim() : \"Summary section not found.\";\n\nreturn [\n  {\n    json: {\n      summary: summarySection\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        -32
+      ],
+      "id": "37df8c38-c9b0-45b4-81cf-85def84dd508",
+      "name": "Extract summary"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "n8n_input",
+        "limit": 1,
+        "filter": {
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1424,
+        80
+      ],
+      "id": "6e36f7ff-fc43-483d-a604-53a940b23ce3",
+      "name": "Search folder",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AQSvDFycwNVB3Oog",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "=name = 'mock_data' and mimeType = 'application/vnd.google-apps.spreadsheet'\n",
+        "limit": 1,
+        "filter": {
+          "whatToSearch": "files"
+        },
+        "options": {
+          "fields": [
+            "id",
+            "webViewLink"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -976,
+        64
+      ],
+      "id": "d1173ff6-82eb-42a9-8bcd-2a4fb89736e6",
+      "name": "Search file",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "AQSvDFycwNVB3Oog",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09KC94A7L5",
+          "mode": "list",
+          "cachedResultName": "all-marketing-agency"
+        },
+        "text": "=Weekly Report\n\nData Extraction Error:  \nNo such FOLDER was found in the Google Drive for this week.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -832,
+        448
+      ],
+      "id": "a00cc249-309a-440f-bc01-6fad61a46f84",
+      "name": "Send Folder Error",
+      "webhookId": "8499b44c-2294-4785-b1db-e40308789fcd",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "fRIlwdoKIvd1XAMV",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Weekly Report\n\nData Extraction Error:  \nNo such FOLDER was found in the Google Drive for this week."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        448
+      ],
+      "id": "7c285350-6914-4f56-a1db-36a5fcee35c4",
+      "name": "Folder: Stop and Error"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09KC94A7L5",
+          "mode": "list",
+          "cachedResultName": "all-marketing-agency"
+        },
+        "text": "=Weekly Report\n\nData Extraction Error:  \nNo such FILE was found in the Google Drive folder for this week.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -464,
+        304
+      ],
+      "id": "005c10e1-a7fb-40ce-b19d-ace383c11f9c",
+      "name": "Send File Error",
+      "webhookId": "c6d0474c-55d0-441b-b228-17e647710cbf",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "fRIlwdoKIvd1XAMV",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Weekly Report\n\nData Extraction Error:  \nNo such FILE was found in the Google Drive folder for this week."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        304
+      ],
+      "id": "b372a0ce-31b1-4415-91fd-d27f32a3f311",
+      "name": "File: Stop and Error"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1babd62-0e73-4c10-835a-9b5dcddd4e04",
+              "leftValue": "={{ Object.keys($json).length > 0 }}",
+              "rightValue": "={{ 1 }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1200,
+        80
+      ],
+      "id": "2a5bbeec-45ed-487e-a445-ca04038b0119",
+      "name": "If folder exists",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "19a2bf97-f3d0-422b-bb14-ceb9f80c96fc",
+              "leftValue": "={{ Object.keys($json).length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -768,
+        64
+      ],
+      "id": "d9c4ea88-509b-47e7-bbd3-4f2929ae71fb",
+      "name": "If file exists"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09KC94A7L5",
+          "mode": "list",
+          "cachedResultName": "all-marketing-agency"
+        },
+        "text": "={{ $node[\"Get Week of the Month\"].json[\"full_label\"] }} - Weekly Report\n\nSummary:\n{{ $json.summary }}\n\nAccess the data here:\nhttps://docs.google.com/spreadsheets/d/{{ $node[\"Move file\"].json[\"id\"] }}\n\nPerformance Values:\n• Total Campaigns: {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Total Campaigns\"] }}\n• Total Clicks: {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Total Clicks\"] }}\n• Total Impressions: {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Total Impressions\"] }}\n• Total Conversions: {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Total Conversions\"] }}\n• Total Cost ($): {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Total Cost ($)\"] }}\n• Average CTR (%): {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Average CTR (%)\"] }}\n• Average CPA ($): {{ $node[\"Data Cleaning and Transformation\"].json.summary[\"Average CPA ($)\"] }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": true,
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2560,
+        -32
+      ],
+      "id": "2514ea7b-d6bd-4929-9804-e9c190ec107e",
+      "name": "Success message",
+      "webhookId": "8c72374d-3121-4846-8b2d-cbe98834fc30",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "fRIlwdoKIvd1XAMV",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "29f4b928-b4aa-4224-80b6-86ff0722b695",
+              "leftValue": "={{ Object.keys($json).length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        48
+      ],
+      "id": "4d97cfe8-f1cf-4cca-8aee-6079db3d3994",
+      "name": "If data exists"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09KC94A7L5",
+          "mode": "list",
+          "cachedResultName": "all-marketing-agency"
+        },
+        "text": "=Weekly Report\n\nData Extraction Error:  \nNo DATA was found in the Google Drive file for this week.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        208
+      ],
+      "id": "c80385f9-779e-4379-a503-0443bd3ab3d9",
+      "name": "Send Data Error",
+      "webhookId": "1701c486-288c-4e70-a6bd-5f940405e839",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "fRIlwdoKIvd1XAMV",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Weekly Report\n\nData Extraction Error:  \nNo DATA was found in the Google Drive file for this week."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        144,
+        208
+      ],
+      "id": "b3f1ec65-d8b2-40d6-9c7d-ed06ff27a962",
+      "name": "Data: Stop and Error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If data exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Set to text/html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create file from text": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Cleaning and Transformation": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Week of the Month": {
+      "main": [
+        [
+          {
+            "node": "Create file from text",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create spreadsheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set to text/html": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update file": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Move file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move file": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Map table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Map title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map table": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map title": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Extract summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract summary": {
+      "main": [
+        [
+          {
+            "node": "Success message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search folder": {
+      "main": [
+        [
+          {
+            "node": "If folder exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Folder Error": {
+      "main": [
+        [
+          {
+            "node": "Folder: Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send File Error": {
+      "main": [
+        [
+          {
+            "node": "File: Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search file": {
+      "main": [
+        [
+          {
+            "node": "If file exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If folder exists": {
+      "main": [
+        [
+          {
+            "node": "Search file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Folder Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If file exists": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send File Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If data exists": {
+      "main": [
+        [
+          {
+            "node": "Data Cleaning and Transformation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Week of the Month",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Data Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Data Error": {
+      "main": [
+        [
+          {
+            "node": "Data: Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0e94bcdb-1773-4ccf-ae7a-65556416d801",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "932c220b56c4ffc686f5da031d04b4a8a9a3eb5524097a1aa869842da7117f01"
+  },
+  "id": "jV25VqHCIadydEgx",
+  "tags": []
+}
