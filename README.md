@@ -179,12 +179,12 @@ To help you test or demonstrate the workflow without using real ad campaign data
 
 This script generates mock ad campaign performance data and can either save it locally as a CSV file or upload it directly to Google Sheets which is perfect for initial setup, demos, or debugging the workflow.
 
-**🧭 Usage**
-1. Replace the placeholders:
- - SERVICE_ACCOUNT_FILE = "<your_service_account.json>"
- - SPREADSHEET_ID = "<spreadsheet_id>"
- - SHEET_NAME = "<sheet_name>" 
-2. Run the program using CLI and appropriate flag:
- - Either: `python syn_data_generator.py --csv` or: `python syn_data_generator.py --sheet`
+**🧭 Script Usage**
+- Replace the placeholders:
+  - SERVICE_ACCOUNT_FILE = "<your_service_account.json>"
+  - SPREADSHEET_ID = "<spreadsheet_id>"
+  - SHEET_NAME = "<sheet_name>" 
+- Run the program using CLI and appropriate flag:
+  - Either: `python syn_data_generator.py --csv` or: `python syn_data_generator.py --sheet`
  
 
